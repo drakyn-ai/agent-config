@@ -43,6 +43,19 @@ This log serves as long-term memory, allowing Claude to:
 - Claude maintains and curates this log across sessions
 - Regular commits to preserve knowledge
 
+**Global Configuration Setup:**
+- Symlinked `~/.claude/commands` → `~/agent-config/.claude/commands`
+- Symlinked `~/.claude/settings.json` → `~/agent-config/.claude/settings.json`
+- Symlinked `~/memory` → `~/agent-config/memory`
+- Preserved existing `~/.claude/settings.local.json` with permissions
+- Configuration now loads automatically in every session regardless of working directory
+
+**User Workflow:**
+- Uses VSCode connected to VM
+- Claude Code in right-hand panel
+- All sessions now have access to custom commands (/remember, /recall, /memory-sync, /example)
+- Memory system accessible globally via ~/memory
+
 **Next Steps:**
 - Continue building cool projects on this server
 - Utilize the memory system for long-term context
