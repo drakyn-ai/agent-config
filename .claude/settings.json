@@ -15,6 +15,19 @@
     "documentation": {
       "generateComments": true,
       "commentStyle": "JSDoc"
+    },
+    "memory": {
+      "enabled": true,
+      "logPath": "memory/logs/session-log.md",
+      "contextPath": "memory/context/",
+      "autoCommit": true,
+      "updateFrequency": "at significant milestones"
     }
+  },
+  "organization": "drakyn-ai",
+  "server": {
+    "location": "/home/cnguyen",
+    "hasPublicIP": true,
+    "tools": ["gh", "git"]
   }
 }
