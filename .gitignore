@@ -1,0 +1,24 @@
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.log
+
+# Secrets (if any config files contain them)
+secrets/
+*.secret
+*.key
+.env.local
+.env.*.local
+
+# Node modules (if we add any tooling)
+node_modules/

@@ -1,0 +1,20 @@
+{
+  "description": "Claude Code settings for drakyn-ai projects",
+  "preferences": {
+    "codeStyle": {
+      "useTypeScript": true,
+      "useTabs": false,
+      "tabSize": 2,
+      "semicolons": true
+    },
+    "workflow": {
+      "autoCommit": false,
+      "useConventionalCommits": true,
+      "defaultBranch": "main"
+    },
+    "documentation": {
+      "generateComments": true,
+      "commentStyle": "JSDoc"
+    }
+  }
+}
