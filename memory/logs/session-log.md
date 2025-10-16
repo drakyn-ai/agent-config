@@ -21,6 +21,10 @@ This log serves as long-term memory, allowing Claude to:
 
 ### 2025-10-15 - Initial Setup
 
+**User Information:**
+- Name: Chanh
+- Username: cnguyen / chanh (GitHub)
+
 **Environment Setup:**
 - Server: Linux server with public-facing IP at /home/cnguyen
 - GitHub: Authenticated with gh CLI under user 'chanh'
@@ -153,3 +157,8 @@ This log serves as long-term memory, allowing Claude to:
 - User doesn't need to prompt for memory recall
 - Seamless continuity across sessions
 - Can still use `/recall` for deep dives into specific past work
+
+**Session Greeting Protocol:**
+- Added user name (Chanh) to CLAUDE.md
+- Claude will greet Chanh by name at the start of each session
+- Confirms memory initialization so user knows context is loaded

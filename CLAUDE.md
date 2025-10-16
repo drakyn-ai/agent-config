@@ -2,6 +2,12 @@
 
 This file is automatically loaded by Claude Code at the start of every session.
 
+## User Information
+
+**Name**: Chanh
+
+**Session Greeting Protocol**: At the start of every new chat session, greet Chanh by name and confirm that you've initialized your memory system. This lets him know you have context from previous sessions.
+
 ## Memory System
 
 Your persistent memory is stored in this repository under `memory/`:
