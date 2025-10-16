@@ -26,41 +26,55 @@ Configuration and memory management system for Claude Code and other AI coding a
 ---
 
 ### Drakyn Agent
-**Status:** Development (Ready for Deployment)
+**Status:** Development (Ready for Deployment with Gmail Integration)
 **Location:** ~/drakyn-agent
 **Repository:** drakyn-ai/drakyn-agent
 **Domain:** agent.drakyn.ai
 
 **Description:**
-24/7 AI assistant powered by Claude, accessible via secure web interface with Google OAuth authentication.
+24/7 AI assistant powered by Claude, accessible via secure web interface with Google OAuth authentication and Gmail integration.
 
 **Tech Stack:**
 - FastAPI + Uvicorn + Nginx
-- Google OAuth 2.0
-- Anthropic Claude API
+- Google OAuth 2.0 with Gmail API
+- Anthropic Claude API with Tool Use
 - SQLite database
 - WebSocket streaming
 - Let's Encrypt SSL
 - Systemd service
 
-**Current Status:**
+**Current Features:**
 - ✅ Complete codebase implemented
+- ✅ Gmail integration with Claude tool use
+- ✅ Real-time email access (list, search, read)
+- ✅ OAuth token storage and management
 - ✅ Pushed to GitHub
 - ⏳ Awaiting DNS configuration
-- ⏳ Awaiting OAuth credentials setup
+- ⏳ Awaiting OAuth credentials setup (needs Gmail API enabled)
 - ⏳ Awaiting Anthropic API key
 - ⏳ Ready for ./setup.sh deployment
 
+**Gmail Integration:**
+- Read-only access to user's Gmail
+- 4 tools: list_emails, read_email, search_emails, get_recent_unread_emails
+- Full Gmail search syntax support (from:, subject:, is:unread, etc.)
+- Secure OAuth token storage per-user
+- Automatic tool execution during Claude conversations
+
 **Next Steps:**
 1. User configures DNS at name.com
-2. User sets up Google OAuth
+2. User sets up Google OAuth + enables Gmail API
 3. User gets Anthropic API key
 4. User runs ./setup.sh
-5. Test and iterate on features
+5. Test Gmail integration end-to-end
+6. Monitor and iterate on features
 
 **Future Enhancements:**
-- Tool use and code execution
+- Gmail send/compose capabilities
+- Google Calendar integration
+- Google Drive integration
 - Web search integration
+- Code execution
 - File upload/download
 - Multi-user support
 - Custom system prompts

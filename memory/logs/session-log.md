@@ -318,3 +318,121 @@ WebSocket connection to /ws/chat/{conversation_id}
 - Codebase complete and pushed to GitHub
 - Awaiting: DNS configuration, Google OAuth credentials, Anthropic API key
 - Ready for deployment via ./setup.sh once credentials are configured
+
+---
+
+### 2025-10-16 - Gmail Integration Implementation
+
+**Feature: Gmail Integration with Claude Tool Use**
+
+Successfully implemented comprehensive Gmail integration allowing Claude to access and interact with the user's Gmail inbox through tool use.
+
+**Implementation Details:**
+
+1. **OAuth Scope Update** ([main.py:33-43](drakyn-agent/app/main.py#L33-L43))
+   - Added `https://www.googleapis.com/auth/gmail.readonly` scope
+   - Set `access_type: 'offline'` to get refresh token
+   - Set `prompt: 'consent'` to force consent screen
+
+2. **OAuth Token Storage** ([database.py:36-47](drakyn-agent/app/database.py#L36-L47))
+   - Created `oauth_tokens` table with fields:
+     - user_email (unique), access_token, refresh_token, token_type, expires_at
+   - Added `store_oauth_token()` function with upsert logic
+   - Added `get_oauth_token()` function for retrieval
+   - Tokens stored per-user in database
+
+3. **Gmail Client Module** ([gmail_client.py](drakyn-agent/app/gmail_client.py))
+   - Created async Gmail API wrapper
+   - Implemented 4 main functions:
+     - `list_emails()` - List recent emails with optional query filter
+     - `read_email()` - Read full email content by message ID
+     - `search_emails()` - Search using Gmail syntax
+     - `get_recent_unread_emails()` - Quick shortcut for unread
+   - Handles OAuth credentials with refresh token support
+   - Extracts email metadata (from, to, subject, date, snippet)
+   - Decodes base64 email body content
+
+4. **Claude Tool Use Integration** ([claude_client.py:10-189](drakyn-agent/app/claude_client.py#L10-L189))
+   - Defined 4 Gmail tools with detailed schemas:
+     - `list_emails` - Max 50 results, optional query
+     - `read_email` - Requires message_id
+     - `search_emails` - Requires query, supports Gmail operators
+     - `get_recent_unread_emails` - Max 20 results
+   - Enhanced `stream_claude_response()` with:
+     - Tool definitions passed to Claude API
+     - Automatic tool execution when Claude requests
+     - Tool result handling and conversation continuation
+     - Support for multiple tool use rounds
+   - Updated system prompt to mention Gmail access
+
+5. **WebSocket Integration** ([main.py:224](drakyn-agent/app/main.py#L224))
+   - Pass `user_email` to Claude streaming function
+   - Enables per-user OAuth token retrieval
+   - Maintains security isolation between users
+
+6. **Dependencies Added** ([requirements.txt:15-18](drakyn-agent/requirements.txt#L15-L18))
+   - google-api-python-client==2.111.0
+   - google-auth==2.26.2
+   - google-auth-oauthlib==1.2.0
+   - google-auth-httplib2==0.2.0
+
+**Gmail Tool Capabilities:**
+
+**Supported Search Operators:**
+- `from:email@example.com` - Filter by sender
+- `to:email@example.com` - Filter by recipient
+- `subject:keyword` - Search subject line
+- `is:unread` - Only unread emails
+- `is:starred` - Only starred emails
+- `has:attachment` - Has attachments
+- `after:2024/1/1` - After specific date
+- `before:2024/12/31` - Before specific date
+- `newer_than:7d` - Last N days
+- `older_than:30d` - Older than N days
+
+**Example User Queries:**
+- "Show me my 5 most recent emails"
+- "Find emails from john@company.com about the project"
+- "Do I have any unread emails?"
+- "Search for emails with attachments from last week"
+- "Read the full content of email [message_id]"
+
+**Security & Privacy:**
+- Read-only Gmail access (cannot send or delete)
+- OAuth tokens stored per-user, encrypted in database
+- Refresh tokens preserved for long-term access
+- User must re-authenticate if tokens expire or are revoked
+- Each user can only access their own emails (DB-level isolation)
+
+**Architecture Flow:**
+```
+User asks about emails
+  → Claude decides to use Gmail tool
+  → Tool execution retrieves OAuth token from DB
+  → Gmail API called with user's credentials
+  → Results returned to Claude
+  → Claude streams response with email information
+  → User sees natural language summary
+```
+
+**Testing Status:**
+- Code implementation complete
+- Awaiting deployment to test with real Gmail account
+- Need to enable Gmail API in Google Cloud Console
+- OAuth consent screen must include Gmail readonly scope
+
+**Next Steps for Deployment:**
+1. Enable Gmail API in Google Cloud Console
+2. Update OAuth consent screen with Gmail scope
+3. Deploy to production server
+4. Test authentication flow with Gmail consent
+5. Verify tool execution and email access
+6. Monitor API quota and error handling
+
+**Future Enhancements:**
+- Gmail send/compose capabilities (requires different scope)
+- Email draft management
+- Label/folder organization
+- Mark as read/unread
+- Star/unstar emails
+- Archive/trash operations (requires modify scope)
