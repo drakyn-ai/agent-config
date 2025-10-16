@@ -131,3 +131,25 @@ This log serves as long-term memory, allowing Claude to:
 - Run setup script for deployment
 - Test authentication and chat functionality
 - Monitor service and iterate on features
+
+---
+
+### 2025-10-16 - Automatic Memory Loading
+
+**Enhancement: CLAUDE.md Auto-Loading**
+- Created `CLAUDE.md` in agent-config repository
+- File automatically loads at start of every Claude Code session
+- Provides immediate context about memory system, preferences, and active projects
+- Symlinked to `~/.claude/CLAUDE.md` for global availability
+
+**How It Works:**
+- Claude Code automatically reads CLAUDE.md files at session start
+- Loads recursively from current directory up to home directory
+- Symlink ensures it's always available regardless of working directory
+- Eliminates need to manually check memory at session start
+
+**Benefits:**
+- Claude has context from the very beginning of each session
+- User doesn't need to prompt for memory recall
+- Seamless continuity across sessions
+- Can still use `/recall` for deep dives into specific past work
