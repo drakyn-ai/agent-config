@@ -6,7 +6,12 @@ This file is automatically loaded by Claude Code at the start of every session.
 
 **Name**: Chanh
 
-**Session Greeting Protocol**: At the start of every new chat session, greet Chanh by name and confirm that you've initialized your memory system. This lets him know you have context from previous sessions.
+**Session Greeting Protocol**: At the start of every new chat session:
+1. Greet Chanh by name
+2. Confirm that you've loaded the memory system
+3. Identify which machine you're on (Windows WSL or Ubuntu server)
+
+This lets him know you have context from previous sessions and are aware of the environment.
 
 ## Memory System
 
@@ -18,10 +23,25 @@ At the start of each session, you should be aware of the memory system and can r
 
 ## Environment
 
-- **Server**: Linux VM at /home/cnguyen with public IP (20.59.111.132)
+This configuration is shared across multiple machines:
+
+### Windows Development Machine (WSL)
+- **Location**: `/mnt/c/Users/chanh/drakyn`
+- **Purpose**: Primary development for drakyn-desktop (has local GPU)
+- **OS**: Windows with WSL2 (Ubuntu)
+- **Tools Available**: git, standard Linux tools in WSL
+
+### Ubuntu Web Server
+- **Location**: `/home/cnguyen`
+- **Public IP**: 20.59.111.132
+- **Purpose**: Production hosting for web applications (drakyn-agent)
+- **OS**: Ubuntu Linux
+- **Tools Available**: gh CLI, git, standard Linux tools, nginx, systemd
+
+### Shared Configuration
 - **GitHub User**: chanh
 - **Organization**: drakyn-ai (use for all repositories)
-- **Tools Available**: gh CLI, git, standard Linux tools
+- **Repo Sync**: Same agent-config repo used on both machines for consistent preferences and shared memory
 
 ## Global Configuration
 
@@ -36,7 +56,8 @@ Custom slash commands available: `/remember`, `/recall`, `/memory-sync`
 
 See `memory/context/current-projects.md` for current status of:
 - **agent-config**: This repository (configuration management)
-- **drakyn-agent**: AI assistant web app at agent.drakyn.ai
+- **drakyn-agent**: AI assistant web app at agent.drakyn.ai (Ubuntu server)
+- **drakyn-desktop**: Desktop AI application with local GPU support (Windows development machine)
 
 ## Preferences
 

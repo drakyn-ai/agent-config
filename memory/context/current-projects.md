@@ -6,11 +6,13 @@ This file tracks ongoing projects, their status, and next actions.
 
 ### agent-config Repository
 **Status:** Complete (Ongoing Maintenance)
-**Location:** ~/agent-config
+**Location:**
+- Windows: `/mnt/c/Users/chanh/drakyn/agent-config`
+- Ubuntu Server: `~/agent-config`
 **Repository:** drakyn-ai/agent-config
 
 **Description:**
-Configuration and memory management system for Claude Code and other AI coding agents.
+Configuration and memory management system for Claude Code and other AI coding agents. Shared across both Windows development machine and Ubuntu web server.
 
 **Features:**
 - Claude Code settings and preferences
@@ -18,18 +20,21 @@ Configuration and memory management system for Claude Code and other AI coding a
 - Prompt templates
 - Memory/logging system for long-term context
 - Global symlinks for automatic discovery
+- Multi-machine support with git sync
 
 **Next Steps:**
 - Add more custom commands as workflows develop
 - Maintain memory logs across sessions
+- Keep synced between machines via git
 
 ---
 
-### Drakyn Agent
+### Drakyn Agent (Web Application)
 **Status:** Development (Ready for Deployment with Gmail Integration)
-**Location:** ~/drakyn-agent
+**Location:** Ubuntu Server: `~/drakyn-agent`
 **Repository:** drakyn-ai/drakyn-agent
 **Domain:** agent.drakyn.ai
+**Machine:** Ubuntu web server (20.59.111.132)
 
 **Description:**
 24/7 AI assistant powered by Claude, accessible via secure web interface with Google OAuth authentication and Gmail integration.
@@ -79,6 +84,50 @@ Configuration and memory management system for Claude Code and other AI coding a
 - Multi-user support
 - Custom system prompts
 - Voice I/O
+
+---
+
+### Drakyn Desktop (Desktop Application)
+**Status:** Planning / Initial Development
+**Location:** Windows: `/mnt/c/Users/chanh/drakyn/drakyn-desktop`
+**Repository:** drakyn-ai/drakyn-desktop (to be created)
+**Machine:** Windows development machine with WSL
+
+**Description:**
+Desktop AI application with local GPU support for enhanced performance and capabilities.
+
+**Key Advantages:**
+- Local GPU acceleration for faster inference
+- Offline capabilities
+- Direct system integration
+- Privacy-focused (local processing)
+
+**Planned Features:**
+- Local LLM inference with GPU acceleration
+- Desktop integration (file system, clipboard, etc.)
+- Voice input/output
+- Screen capture and analysis
+- Code execution environment
+- Cross-platform support (Windows, Linux, macOS)
+
+**Tech Stack (Proposed):**
+- Electron or Tauri for desktop framework
+- Python backend for AI/ML processing
+- Local model inference (Llama, Mistral, or similar)
+- GPU acceleration (CUDA, ROCm)
+- TypeScript/React for UI
+
+**Current Status:**
+- Project in planning phase
+- Development to occur on Windows machine (has local GPU)
+- Repo not yet created
+
+**Next Steps:**
+1. Define core features and architecture
+2. Choose desktop framework (Electron vs Tauri)
+3. Select local LLM solution
+4. Create repository structure
+5. Begin initial implementation
 
 ---
 
