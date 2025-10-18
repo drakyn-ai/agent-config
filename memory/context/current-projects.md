@@ -88,46 +88,130 @@ Configuration and memory management system for Claude Code and other AI coding a
 ---
 
 ### Drakyn Desktop (Desktop Application)
-**Status:** Planning / Initial Development
+**Status:** Active Development - Agent Architecture Implementation
 **Location:** Windows: `/mnt/c/Users/chanh/drakyn/drakyn-desktop`
-**Repository:** drakyn-ai/drakyn-desktop (to be created)
-**Machine:** Windows development machine with WSL
+**Repository:** drakyn-ai/drakyn-desktop
+**Machine:** Windows development machine with WSL (local GPU)
 
 **Description:**
-Desktop AI application with local GPU support for enhanced performance and capabilities.
+Desktop AI agent application with local GPU inference and tool integration via Model Context Protocol (MCP).
 
 **Key Advantages:**
 - Local GPU acceleration for faster inference
-- Offline capabilities
-- Direct system integration
+- Offline-capable agent with tool execution
+- Direct system integration (email, files, code execution)
 - Privacy-focused (local processing)
+- Hybrid architecture: custom orchestration + off-the-shelf components
 
-**Planned Features:**
-- Local LLM inference with GPU acceleration
-- Desktop integration (file system, clipboard, etc.)
-- Voice input/output
-- Screen capture and analysis
-- Code execution environment
-- Cross-platform support (Windows, Linux, macOS)
+**Current Tech Stack:**
+- **Desktop Framework:** Electron
+- **Backend:** Python 3 with FastAPI
+- **Inference Engine:** vLLM (local GPU acceleration)
+- **Agent Framework:** Custom orchestration loop
+- **Tool Protocol:** MCP (Model Context Protocol)
+- **LLM Abstraction:** LiteLLM (multi-provider support)
+- **Structured Outputs:** Instructor (Pydantic-based parsing)
+- **UI:** Vanilla JavaScript with dark VS Code theme
+- **GPU:** CUDA support via vLLM
 
-**Tech Stack (Proposed):**
-- Electron or Tauri for desktop framework
-- Python backend for AI/ML processing
-- Local model inference (Llama, Mistral, or similar)
-- GPU acceleration (CUDA, ROCm)
-- TypeScript/React for UI
+**Architecture Decision (2025-10-17):**
+After evaluating LangChain vs LangGraph vs custom implementation, chose **hybrid approach**:
+- **Custom agent orchestrator** - Simple, transparent reasoning loop (~300 lines)
+- **LiteLLM** - Multi-provider LLM calls (OpenAI, Anthropic, local vLLM)
+- **Instructor** - Reliable structured output parsing (tool calls)
+- **MCP SDK** - Standard tool protocol for extensibility
 
-**Current Status:**
-- Project in planning phase
-- Development to occur on Windows machine (has local GPU)
-- Repo not yet created
+**Rationale:**
+- Speed: Direct control over reasoning flow, no graph abstractions
+- Context size: Small focused modules (~100-250 lines each) for coding agent modifications
+- Flexibility: Use off-the-shelf components where they add value, custom code for core logic
+- Debuggability: Linear execution, transparent flow, standard Python debugging
+
+**Current Implementation Status:**
+- ✅ Electron app with VS Code dark theme UI
+- ✅ vLLM inference server with auto-setup
+- ✅ Python virtualenv management (reuses after first run)
+- ✅ Model loading/unloading via UI
+- ✅ Basic chat interface with streaming
+- ✅ Connection status monitoring
+- ⏳ Agent orchestrator (in progress)
+- ⏳ Tool calling support
+- ⏳ MCP tool implementations (email, files, code)
+- ⏳ Streaming agent thinking steps to UI
+
+**File Structure:**
+```
+src/
+├── electron/
+│   ├── main.js              # Electron lifecycle, service spawning
+│   └── preload.js           # Security bridge
+├── services/
+│   ├── inference/
+│   │   ├── server.py        # FastAPI + vLLM
+│   │   ├── agent/           # NEW: Agent components
+│   │   │   ├── orchestrator.py  # Core reasoning loop
+│   │   │   ├── models.py        # Pydantic schemas
+│   │   │   └── prompts.py       # System prompts
+│   │   ├── providers/       # NEW: LLM abstraction
+│   │   │   └── litellm_client.py
+│   │   ├── setup.js         # Python env initialization
+│   │   └── requirements.txt
+│   └── mcp/
+│       ├── server.py        # Tool registry & execution
+│       ├── tools/           # NEW: Tool implementations
+│       │   ├── email.py
+│       │   ├── files.py
+│       │   └── code.py
+│       └── requirements.txt
+└── public/
+    ├── index.html           # Chat UI
+    ├── app.js               # Frontend logic
+    └── styles.css           # Dark theme
+```
+
+**Agent Flow (Example: "Read my latest emails"):**
+```
+User message
+  → AgentOrchestrator.run()
+    → LiteLLM.completion() with tools schema
+    → Instructor.parse() extracts tool call
+    → MCP client executes tool via HTTP
+    → Tool result added to context
+    → LiteLLM generates final answer
+    → Stream steps to UI
+```
+
+**Dependencies:**
+```
+Inference server:
+- vllm>=0.3.0          # GPU inference
+- litellm>=1.0.0       # Multi-provider
+- instructor>=1.0.0    # Structured outputs
+- mcp>=1.0.0           # Tool protocol
+- fastapi, uvicorn, torch, pydantic
+
+MCP server:
+- mcp>=1.0.0
+- fastapi, uvicorn, pydantic
+```
+
+**Current Session Tasks:**
+1. ✅ Architecture design committed to memory
+2. ⏳ Implement agent/orchestrator.py (core reasoning loop)
+3. ⏳ Implement agent/models.py (Pydantic schemas)
+4. ⏳ Implement agent/prompts.py (system prompts)
+5. ⏳ Update server.py with /v1/agent/chat endpoint
+6. ⏳ Implement example MCP tool (email)
+7. ⏳ Update UI to display agent steps
 
 **Next Steps:**
-1. Define core features and architecture
-2. Choose desktop framework (Electron vs Tauri)
-3. Select local LLM solution
-4. Create repository structure
-5. Begin initial implementation
+1. Complete agent orchestrator implementation
+2. Test tool calling with local vLLM model
+3. Implement email tool (IMAP/Gmail API)
+4. Add file search tool
+5. Add code execution tool (sandboxed)
+6. Build streaming UI for agent reasoning steps
+7. Test end-to-end agent flow
 
 ---
 

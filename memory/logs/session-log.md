@@ -436,3 +436,165 @@ User asks about emails
 - Mark as read/unread
 - Star/unstar emails
 - Archive/trash operations (requires modify scope)
+
+---
+
+### 2025-10-17 - Drakyn Desktop: Agent Architecture Design
+
+**Project:** Drakyn Desktop - Local AI Agent Application
+
+**Context:**
+User wants to build a desktop AI agent that uses local GPU inference (vLLM) with tool execution capabilities via Model Context Protocol (MCP). The agent should be able to reason, call tools, and stream thinking steps to the UI.
+
+**Architecture Decision: Hybrid Approach**
+
+After evaluating three options:
+1. LangChain - Too heavy, abstraction overhead
+2. LangGraph - Overkill for sequential agent patterns, complex graphs unnecessary
+3. Custom implementation - Maximum control but more code
+
+**Chose:** Hybrid approach combining custom orchestration with battle-tested components
+
+**Component Selection:**
+
+1. **Custom Agent Orchestrator** (~300 lines)
+   - Simple linear reasoning loop
+   - Transparent, debuggable execution
+   - Easy for coding agents to modify
+   - Full control over streaming
+
+2. **LiteLLM** - Multi-provider abstraction
+   - Already in requirements.txt
+   - Supports vLLM, OpenAI, Anthropic with same API
+   - User can switch providers without code changes
+   - ~5MB, worth it for flexibility
+
+3. **Instructor** - Structured output parsing
+   - Reliable tool call extraction from model outputs
+   - Pydantic-based type safety
+   - Works with any OpenAI-compatible LLM
+   - ~2MB, eliminates brittle regex parsing
+
+4. **MCP SDK** - Tool protocol
+   - Already in requirements.txt
+   - Standard protocol for tool integrations
+   - Growing ecosystem of pre-built tools
+   - Anthropic-maintained, production-ready
+
+**Rationale:**
+- **Speed:** Direct control over reasoning flow, no graph traversal overhead
+- **Context size:** Small focused modules (100-250 lines) optimized for coding agent modifications
+- **Flexibility:** Off-the-shelf components where they add value, custom for core logic
+- **Debuggability:** Linear execution, standard Python debugging, no magic
+- **Bundle size:** User doesn't care, so use libraries that improve speed/maintainability
+
+**Architecture Flow:**
+
+```
+User: "Read my latest emails"
+  ↓
+Electron UI (POST /v1/agent/chat, streaming)
+  ↓
+AgentOrchestrator.run(message)
+  ├─ Step 1: Reasoning
+  │  ├─ LiteLLM.completion() with tools schema
+  │  ├─ Model thinks: "I need to read emails"
+  │  └─ Stream: {"type": "thought", ...}
+  │
+  ├─ Step 2: Tool Call Detection
+  │  ├─ Instructor.parse(response)
+  │  └─ Extract: {"tool": "read_emails", "args": {...}}
+  │
+  ├─ Step 3: Execute Tool
+  │  ├─ MCP client → POST localhost:8001/execute
+  │  ├─ MCP server executes EmailTool
+  │  ├─ Returns email data
+  │  └─ Stream: {"type": "tool_call"}, {"type": "tool_result"}
+  │
+  ├─ Step 4: Final Answer
+  │  ├─ LiteLLM.completion(with_tool_results)
+  │  └─ Stream: {"type": "answer", ...}
+  │
+  └─ Return complete conversation
+```
+
+**File Structure:**
+
+```
+src/services/inference/
+├── server.py                    # FastAPI app (~200 lines)
+├── agent/
+│   ├── __init__.py
+│   ├── orchestrator.py          # Core loop (~250 lines)
+│   ├── models.py                # Pydantic schemas (~100 lines)
+│   └── prompts.py               # System prompts (~50 lines)
+├── providers/
+│   └── litellm_client.py        # LLM wrapper (~100 lines)
+└── requirements.txt
+
+src/services/mcp/
+├── server.py                    # MCP server (~150 lines)
+├── tools/
+│   ├── __init__.py
+│   ├── email.py                 # Email tool (~200 lines)
+│   ├── files.py                 # File search (~150 lines)
+│   └── code.py                  # Code execution (~200 lines)
+└── requirements.txt
+
+Total: ~1,400 lines across focused modules
+```
+
+**Key Benefits:**
+
+1. **Optimized for Coding Agents:**
+   - Each file small enough to fit in context window
+   - Clear separation of concerns
+   - Easy to locate and modify specific functionality
+   - "Add X to the loop" is straightforward
+
+2. **Performance:**
+   - No graph abstractions or serialization overhead
+   - Direct LLM calls via LiteLLM
+   - Streaming yields steps immediately
+   - Local GPU inference with vLLM
+
+3. **Maintainability:**
+   - Simple linear flow, easy to debug
+   - Type hints throughout
+   - Standard Python debugging
+   - No vendor lock-in
+
+**Updated Dependencies:**
+
+```python
+# Inference server requirements.txt
+fastapi>=0.109.0
+uvicorn>=0.27.0
+vllm>=0.3.0
+torch>=2.1.0
+pydantic>=2.5.0
+python-dotenv>=1.0.0
+litellm>=1.0.0          # NEW: Multi-provider
+instructor>=1.0.0       # NEW: Structured outputs
+mcp>=1.0.0             # NEW: Tool protocol
+
+# MCP server requirements.txt
+fastapi>=0.109.0
+uvicorn>=0.27.0
+pydantic>=2.5.0
+mcp>=1.0.0
+```
+
+**Implementation Plan:**
+
+1. Create agent/orchestrator.py - Core reasoning loop with streaming
+2. Create agent/models.py - Pydantic schemas (ToolCall, AgentStep, Message)
+3. Create agent/prompts.py - System prompts for agent behavior
+4. Update server.py - Add /v1/agent/chat endpoint
+5. Implement tools/email.py - Example MCP tool (IMAP/Gmail)
+6. Update UI - Display agent reasoning steps and tool calls
+
+**Current Status:**
+- Architecture committed to memory in current-projects.md
+- Ready to begin implementation
+- Will build incrementally and test each component
