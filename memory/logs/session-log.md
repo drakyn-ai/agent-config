@@ -598,3 +598,94 @@ mcp>=1.0.0
 - Architecture committed to memory in current-projects.md
 - Ready to begin implementation
 - Will build incrementally and test each component
+
+---
+
+### 2025-10-19 - Drakyn Desktop: Agent Chat Working + Performance Optimization
+
+**Major Milestone:** Successfully debugged and optimized the local agent chat system
+
+**Critical Issues Fixed:**
+
+1. **Python Import Hell (13-second delay)**
+   - Problem: Lazy imports inside `_get_model_response()` took 13 seconds
+   - Root cause: `from providers import ...` was loading entire LiteLLM library on every message
+   - Solution: Moved imports to module top-level (executed once at startup)
+   - Result: Response time dropped from 13+ seconds to <1 second
+
+2. **Relative Import Errors**
+   - Problem: "attempted relative import beyond top-level package"
+   - Root cause: Python couldn't resolve package structure when running `server.py` directly
+   - Solution: Added `sys.path.insert(0, str(Path(__file__).parent))` in server.py
+   - Also changed `from ..agent.models` to `from agent.models` throughout
+
+3. **LiteLLM + Ollama Integration**
+   - Problem: LiteLLM didn't recognize Ollama model format
+   - Solution: Created `OllamaClient` wrapper class that adds `ollama/` prefix
+   - Configured proper routing: openai_compatible mode → ollama/ prefix → Ollama server
+
+4. **Model Hallucinations**
+   - Problem: Model outputting training data conversations and calling tools repeatedly
+   - Root cause: System prompt too long/complex (3200 chars), confused smaller models
+   - Solution: Drastically simplified prompt (500 chars), explicit "when NOT to use tools" guidance
+   - Also reduced max_tokens from 2048 to 512 to prevent rambling
+
+5. **Chat Template Artifacts**
+   - Problem: Responses included "### Assistant:" prefix from model's training format
+   - Solution: Added regex post-processing to strip role prefixes (Assistant:, User:, etc.)
+
+**Model Persistence Implemented:**
+- Added `CURRENT_MODEL` to .env file
+- Auto-saves selected model when user loads/sets a model
+- Server restores last used model on startup
+- Works for both vLLM and openai_compatible modes
+
+**Logging & Debugging Enhancements:**
+- Added millisecond timestamps to all logs (HH:MM:SS.mmm format)
+- Comprehensive [TIMING] logs at each orchestration step
+- LiteLLM verbose mode for debugging
+- Message size/count logging before LLM calls
+- Full model response logging (first 500 chars)
+
+**Performance Metrics:**
+- **Before:** 13+ seconds per message (13s import + 0.5s LLM)
+- **After:** <1 second per message (0.001s setup + 0.3-0.5s LLM)
+- **Improvement:** ~13x faster
+
+**Technical Learnings:**
+
+1. **Python Import Performance:**
+   - Lazy imports convenient but costly in hot paths
+   - LiteLLM has heavy import tree (13 seconds on WSL)
+   - Always profile before optimizing - timing logs revealed the bottleneck
+
+2. **LiteLLM Provider Routing:**
+   - Model name format determines provider: `ollama/model-name`, `openai/model-name`
+   - Ollama needs explicit prefix, doesn't auto-detect
+   - Can set custom `api_base` for local servers
+
+3. **Smaller Models Need Simpler Prompts:**
+   - Qwen2.5-Coder 30B confused by verbose system prompts
+   - Simple, direct instructions work better than long guidelines
+   - Explicit "do NOT do X" more effective than "here's how to do X"
+
+4. **WSL Performance Quirks:**
+   - Python imports slower on WSL than native Linux
+   - File I/O across WSL boundary has overhead
+   - Network calls to `cnguyen-desktop.local` work fine (Ollama server)
+
+**Files Modified:**
+- server.py - Added sys.path, logging format, model persistence
+- orchestrator.py - Moved imports to top, added timing, response cleanup
+- litellm_client.py - Created OllamaClient, added timeouts, verbose logging
+- prompts.py - Simplified system prompt dramatically
+- models.py - Reduced default max_tokens to 512
+- app.js - Better tool call display, show reasoning
+- .env.example - Documented CURRENT_MODEL for persistence
+
+**Current State:**
+- Agent chat fully functional with Ollama
+- Model selection persists across restarts
+- Response time <1 second
+- Clean UI output without formatting artifacts
+- Ready for real usage and testing
