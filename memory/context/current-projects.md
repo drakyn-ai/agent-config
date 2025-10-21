@@ -222,16 +222,72 @@ MCP server:
 - SSE streaming from server to UI
 - Real-time agent reasoning visualization
 
+**Recent Updates (2025-10-20):**
+
+**Proactive Agent Design:**
+- ✅ Designed proactive agent architecture (background monitoring, suggestions, learning)
+- ✅ Created detailed architecture document: `docs/PROACTIVE_AGENT.md`
+- ✅ Key insight: Use plain text memory instead of SQLite database
+- ✅ Agent manages its own memory in `~/.drakyn/user_context.txt`
+- ✅ Implemented `user_context` tool (read/update plain text memory)
+- ✅ Tool registered in MCP server
+
+**Proactive Agent Vision:**
+Transform from reactive chat agent into proactive, context-aware assistant that:
+- Monitors user context (emails, calendar, system state) in background
+- Proactively suggests helpful actions based on learned context
+- Asks questions to learn about user's life, preferences, patterns
+- Manages its own memory in natural language (plain text file)
+
+**Architecture Components:**
+1. **User Context System** (`~/.drakyn/user_context.txt`)
+   - Plain text memory managed by agent
+   - Natural language, human-readable
+   - Agent reads/updates using `user_context` tool
+
+2. **Background Monitor Service** (to be implemented)
+   - Runs every 30-60 minutes
+   - Gathers context snapshots (emails, calendar, system)
+   - Calls agent to analyze and suggest actions
+
+3. **Context Analyzer** (to be implemented)
+   - LLM-based analysis of current situation
+   - Generates proactive suggestions
+   - Respects user preferences
+
+4. **Learning System** (to be implemented)
+   - Asks questions to build user context
+   - Agent updates its own context file
+   - Max 3 questions per day
+
+5. **Notification System** (to be implemented)
+   - System notifications
+   - In-app suggestion panel
+   - Respects quiet hours
+
+**Design Philosophy:**
+- **Plain text over database:** LLMs work best with natural language
+- **Agent self-manages:** Agent reads/writes its own memory
+- **Privacy-first:** All data local, human-readable, easy to delete
+- **Simple implementation:** ~500 lines of code vs 2000+ with database
+
+**Implementation Status:**
+- ✅ Design complete (docs/PROACTIVE_AGENT.md)
+- ✅ user_context tool implemented and registered
+- ⏳ Background monitor service (pending)
+- ⏳ Context analyzer (pending)
+- ⏳ Learning system (pending)
+- ⏳ Notification system (pending)
+- ⏳ UI components (pending)
+
 **Next Steps:**
-1. Test agent with loaded vLLM model
-2. Verify tool calling and SSE streaming work end-to-end
-3. Add more tools:
-   - Email tool (IMAP/Gmail API)
-   - Code execution tool (sandboxed Python)
-   - Web search tool (SerpAPI/Tavily)
-4. Add conversation history persistence
-5. Optimize streaming (token-level instead of step-level)
-6. Test with different LLM providers (OpenAI, Anthropic)
+1. Test user_context tool with agent
+2. Implement background monitor service
+3. Implement context analyzer (LLM-based suggestions)
+4. Add notification system
+5. Implement learning system
+6. Build UI for suggestions and settings
+7. Test end-to-end proactive behaviors
 
 ---
 
