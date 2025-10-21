@@ -271,7 +271,7 @@ Transform from reactive chat agent into proactive, context-aware assistant that:
 - **Privacy-first:** All data local, human-readable, easy to delete
 - **Simple implementation:** ~500 lines of code vs 2000+ with database
 
-**Implementation Status (Phase 1 & 2 Complete):**
+**Implementation Status (Phase 1, 2 & 3 Complete):**
 - ✅ Design complete (docs/PROACTIVE_AGENT.md)
 - ✅ user_context tool implemented and registered
 - ✅ Background monitor service implemented (src/services/monitor/service.py)
@@ -281,26 +281,45 @@ Transform from reactive chat agent into proactive, context-aware assistant that:
 - ✅ System state monitoring (battery, etc.)
 - ✅ Quiet hours support
 - ✅ Suggestion logging and history
+- ✅ Notification system (IPC server, system notifications, in-app panel)
+- ✅ User interaction (accept/dismiss buttons)
+- ✅ Real-time suggestion updates via IPC
 - ⏳ Learning system (pending)
-- ⏳ Notification system UI (pending - currently logs only)
-- ⏳ UI components (pending)
+- ⏳ Settings UI for preferences (pending)
+- ⏳ Calendar integration (pending)
 
 **What Works Now:**
 - Background service runs every 30 minutes
 - Gathers context from emails and system
 - Asks agent LLM if there are helpful actions
-- Parses and logs suggestions
+- Parses suggestions and sends to notification system
+- Shows system notifications via Electron
+- Displays in-app suggestion panel (floating UI)
+- User can accept or dismiss suggestions
+- Badge shows pending suggestion count
 - Respects user preferences and quiet hours
 - All suggestions saved to ~/.drakyn/suggestion_history.txt
 
+**Architecture:**
+```
+Monitor Service (Python) → IPC Server (Node.js:9999)
+                              ↓
+                    System Notification (Electron)
+                              ↓
+                    Renderer Process (IPC event)
+                              ↓
+                    Suggestion Panel (React-like UI)
+                              ↓
+                    User Action (Accept/Dismiss)
+```
+
 **Next Steps:**
-1. Test background monitor end-to-end
-2. Implement system notification UI (not just logging)
-3. Build in-app suggestion panel
-4. Implement learning system (proactive questions)
-5. Add settings UI for preferences
-6. Add calendar integration
-7. Polish user experience
+1. Test complete flow end-to-end
+2. Implement learning system (proactive questions)
+3. Add settings UI for preferences
+4. Add calendar integration
+5. Polish user experience
+6. Add conversation context to suggestions
 
 ---
 
